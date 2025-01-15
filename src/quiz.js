@@ -56,6 +56,17 @@ class Quiz {
     let sum = this.questions.reduce((acc, cur) => acc + cur.difficulty, 0);
     return sum / this.questions.length;
   }
+
+  resetQuiz() {
+    // Reset the current question index to 0
+    this.currentQuestionIndex = 0;
+    // Reset the correct answers count
+    this.correctAnswers = 0;
+    // Reset the time remaining to initial duration
+    this.timeRemaining = this.duration;
+    // Optionally shuffle questions again
+    this.shuffleQuestions();
+  }
 }
 
 // const testQuestions = ["question1", "question2", "question3"];
