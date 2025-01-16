@@ -78,10 +78,42 @@ document.addEventListener("DOMContentLoaded", () => {
   nextButton.addEventListener("click", nextButtonHandler);
 
   /************  FUNCTIONS  ************/
-
   // showQuestion() - Displays the current question and its choices
   // nextButtonHandler() - Handles the click on the next button
   // showResults() - Displays the end view and the quiz results
+
+  function toMinutesFunc(miliseconds) {
+    return Math.floor(miliseconds / (60 * 1000))
+      .toString()
+      .padStart(2, "0");
+  }
+
+  function toSecondsFunc(miliseconds) {
+    return Math.floor((miliseconds % 60000) / 1000)
+      .toString()
+      .padStart(2, "0");
+  }
+
+  function startTimer(timeInSeconds) {
+    let timeRemained = timeInSeconds * 1000;
+    let minutesRemained = toMinutesFunc(timeInSeconds);
+    let secondsRemained = toSecondsFunc(timeInSeconds);
+
+    const interval = setInterval(() => {
+      timeRemained -= 1000;
+      minutesRemained = toMinutesFunc(timeRemained);
+      secondsRemained = toSecondsFunc(timeRemained);
+
+      timeRemainingContainer.innerText = `${minutesRemained}:${secondsRemained}`;
+
+      if (timeRemained === 0 || quiz.hasEnded()) {
+        clearInterval(interval);
+        showResults();
+      }
+    }, 1000);
+  }
+
+  const interval = startTimer(quiz.timeRemaining);
 
   function showQuestion() {
     // If the quiz has ended, show the results
@@ -108,15 +140,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 2. Update the green progress bar
     // Update the green progress bar (div#progressBar) width so that it shows the percentage of questions answered
+    let progress =
+      Math.floor((1 / questions.length) * 100) * quiz.currentQuestionIndex;
 
-    progressBar.style.width = `65%`; // This value is hardcoded as a placeholder
+    progressBar.style.width = `${progress}%`; // This value is hardcoded as a placeholder
 
     // 3. Update the question count text
     // console.log(quiz);
     // Update the question count (div#questionCount) show the current question out of total questions
-    questionCount.innerText = `Question ${quiz.currentQuestionIndex + 1} of ${
-      quiz.questions.length
-    }`;
+    questionCount.innerText = `Question ${quiz.currentQuestionIndex} of ${quiz.questions.length}`;
 
     // 4. Create and display new radio input element with a label for each choice.
     // Loop through the current question `choices`.
@@ -198,14 +230,16 @@ document.addEventListener("DOMContentLoaded", () => {
     quizView.style.display = "block";
     endView.style.display = "none";
 
-    // Reset timer if needed
-    clearInterval(timer); // Add this if you have a timer running
-
     // Reset progress bar
     progressBar.style.width = "0%";
+    clearInterval(interval);
+
+    // Reset timer to initial value
+    quiz.timeRemaining = quizDuration;
 
     // Show first question
     showQuestion();
+    startTimer(quiz.timeRemaining);
   }
 
   const restartButton = document.getElementById("restartButton");
